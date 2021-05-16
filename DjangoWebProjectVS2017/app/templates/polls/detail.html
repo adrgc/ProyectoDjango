@@ -1,0 +1,77 @@
+﻿<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+</style>
+{% extends "app/layout.html" %}
+{% block content %}
+
+<h2>{{ title }}.</h2>
+<h3>{{ message }}</h3>
+
+<h3>Pregunta: {{ question.question_text }}</h3>
+{% if error_message %}<p><strong style="color:red;"><b>{{ error_message }}</b></strong></p>{% endif %}
+<form onsubmit="return process();" method="post">
+{% csrf_token %}
+
+{% if request.user.is_authenticated %}
+    <table>
+        <tr>
+            <th>Choice text</th>
+            <th>Votes</th>
+            <th>Answer</th>
+        </tr>
+        
+    
+    {% for choice in question.choice_set.all %}
+        <tr>
+            <td>{{choice.choice_text}}</td>
+            <td>{{choice.votes}}</td>
+            <td>{{choice.correct}}</td>
+        </tr>
+{% endfor %}
+     </table>
+    <a href="{% url 'choice_add' question.id %}"><h3>Insertar Opciones</h3></a> 
+    <a href="{% url 'chart' question.id %}"> <h3>Ver resultado de la votacion</h3> </a><br />
+{% else %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script>
+    function process() {
+        var radioValue = $("input[name='choice']:checked").val();
+        if (radioValue) {
+            $.ajax({
+                type: "POST",
+                url: "/correctono",
+                data: {
+                    'question': {{question.id}}, 'choice': radioValue, 'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val(),
+                },
+                success: function (data) {
+                    $("#feedback").html(data);
+                },
+            })
+        } else {
+            $("#feedback").html('<p><strong style="color:red;"><b>ERROR: Selecciona una opcion</b></strong></p>');
+        }
+        return false;
+        }
+    </script>
+    <p id="feedback"></p>
+
+    {% for choice in question.choice_set.all %}
+    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+{% endfor %}
+    <input type="submit" value="Vote" />
+{% endif %}
+
+</form>
+{% endblock %}

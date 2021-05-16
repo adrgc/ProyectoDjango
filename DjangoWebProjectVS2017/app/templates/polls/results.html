@@ -1,0 +1,41 @@
+﻿<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+</style>
+{% extends "app/layout.html" %}
+{% block content %}
+
+<h2>{{ title }}.</h2>
+<h3>{{ message }}</h3>
+
+<h1>{{ question.question_text }}</h1>
+{%if correct %}<h2 style="color:forestgreen">Respuesta correcta :)</h2>{%else%}<h2 style="color:red">Respuesta incorrecta :(</h2>{%endif%}
+<table>
+        <tr>
+            <th>Choice text</th>
+            <th>Votes</th>
+         
+        </tr>
+{% for choice in question.choice_set.all %}
+  <tr>
+            <td>{{choice.choice_text}}</td>
+            <td>{{choice.votes}}</td>
+          
+        </tr>
+{% endfor %}
+     </table>
+
+
+<a href="{% url 'chart' question.id %}"> Ver grafica</a><br />
+<a href="{% url 'index' %}">Contestar otra pregunta?</a>
+
+{% endblock %}
